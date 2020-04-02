@@ -3,7 +3,12 @@
   file:
     path: "{{ dynatrace_wsagent_linux_install_dir }}"
     state: directory
-  register: dynatrace_wsagent_create_install_dir_result
+  become: yes
+
+- name: "Check if installation directory {{ dynatrace_wsagent_linux_install_dir }} exists"
+  stat:
+    path: "{{ dynatrace_wsagent_linux_install_dir }}"
+  register: dynatrace_wsagent_install_dir_result
   become: yes
 
 - name: Change ownership of the installation directory if it had to be created
@@ -11,7 +16,7 @@
     path: "{{ dynatrace_wsagent_linux_install_dir }}"
     owner: "{{ dynatrace_wsagent_owner }}"
     group: "{{ dynatrace_wsagent_group }}"
-  when: dynatrace_wsagent_create_install_dir_result | changed
+  when: dynatrace_wsagent_install_dir_result.stat.exists == True 
   become: yes
 
 - name: "Copy the Dynatrace installer to {{ dynatrace_wsagent_linux_install_dir }} if the installer is provided locally"
